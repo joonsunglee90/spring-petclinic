@@ -71,5 +71,28 @@ pipeline {
                 """
             }
         }
+        stage('SSH Publish') {
+            steps {
+                echo 'SSH Publish'
+                sshPublisher(publishers: [sshPublisherDesc(configName: 'target', 
+                transfers: [sshTransfer(cleanRemote: false, 
+                excludes: '', 
+                execCommand: '''
+                docker rm -f $(docker ps -aq)
+                docker rmi $(docker images -q)
+                docker pull joonsunglee90/spring-petclinic:latest
+                docker run -d -p 80:8080 --name spring-petclinic joonsunglee90/spring-petclinic:latest
+                ''', 
+                execTimeout: 120000, 
+                flatten: false, 
+                makeEmptyDirs: false, 
+                noDefaultExcludes: false, 
+                patternSeparator: '[, ]+', 
+                remoteDirectorySDF: false, 
+                removePrefix: 'target', 
+                usePromotionTimestamp: false, 
+                useWorkspaceInPromotion: false, verbose: false)])])
+            }
+        }
     }
 }
